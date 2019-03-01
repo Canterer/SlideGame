@@ -3,20 +3,24 @@ module:CardManager
 desc:卡片管理器
 author:Canterer
  */
+const CardType = require('CardEnum').CardType;
+// var CardColors = require('CardEnum').CardColors;
+
 var CardNode = cc.Class({
-    name = "CardNode",
+    // name = "CardNode",
     properties: {
         prefabb: cc.Node,
         type: 0,
         num: 0,
-        index: null
+        index: 1,
     },
 
     ctor:function(type){
         // this.node = node;
         // this.type = type;
         // this.num = num;
-        // if(this.type == 1)//mast
+        // this.cardColor = CardColors[this.type];
+        // if(this.type == CardType.Money)//mast
         
     }
 });

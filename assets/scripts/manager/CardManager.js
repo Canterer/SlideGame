@@ -4,7 +4,6 @@ desc:卡片管理器
 author:Canterer
  */
 var CardNode = require("CardNode");
-var CardColors = require("CardColors")
 
 cc.Class({
     extends: cc.Component,
@@ -14,14 +13,11 @@ cc.Class({
         col: 5,//卡牌列数
         gap: 5,//卡牌间距
         squareFlag: true,
-        cardNodes:{
-            default: [],
-            type: CardNode
-        },
         cardNodePrefab:{
             default: null,
             type:cc.Prefab
-        }
+        },
+        cardContent: cc.Node
     },
 
     onLoad:function(){
@@ -51,10 +47,10 @@ cc.Class({
         var x = row*(this.gap+this.cardSizeX) - this.cardSizeX/2;
         var y = col*(this.gap+this.cardSizeY) - this.cardSizeY/2;
 
-        var type = 3;
-        if(type in CardColors)
-            var color = CardColors[type];
-        else
-            cc.log("type is error")
+        // var type = 3;
+        // if(type in CardColors)
+        //     var color = CardColors[type];
+        // else
+        //     cc.log("type is error")
     }
 });
