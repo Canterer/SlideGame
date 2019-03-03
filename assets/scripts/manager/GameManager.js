@@ -31,3 +31,5 @@ cc.Class({
         cc.director.loadScene("MainGame");
     },
 });
+
+// module.exports = GameManager.Instance;

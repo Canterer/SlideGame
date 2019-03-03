@@ -2891,10 +2891,10 @@
       "__id__": 65
     },
     "_enabled": true,
-    "row": 5,
+    "row": 8,
     "col": 5,
     "gap": 5,
-    "squareFlag": true,
+    "squareFlag": false,
     "cardNodePrefab": {
       "__uuid__": "f69ede68-d286-4475-85e3-0f2cb3f4d4f8"
     },

@@ -30,12 +30,24 @@ cc.Class({
         }
 
         this.cardPositons = [];
+        this.cardNodes = [];
 
-        // this.cardNodes = [];
-        for (var i = 1; i <= this.row; ++i) {
-            for (var j =  1; j <= this.col; ++j) {
-                var x = j*(this.gap+this.cardSizeX) - this.cardSizeX/2;
-                this.createCard(i,j, cc.p(x, 2000));
+        // var flag = false//false 从左往右 true 往返
+        var delay = 0;
+        for (var i = 0; i < this.row; ++i) {
+        	this.cardPositons[i] = [];
+        	this.cardNodes[i] = [];
+            for (var j =  0; j < this.col; ++j) {
+                var x = j*(this.gap+this.cardSizeX) + this.gap + this.cardSizeX/2;
+        		var y = i*(this.gap+this.cardSizeY) + this.gap + this.cardSizeY/2;
+        		this.cardPositons[i][j] = cc.v2(x,y)
+                var cardNode = this.createCard(i,j, cc.v2(x, 2000));
+                delay = delay + 0.1;
+                var type = Math.round(Math.random()*2)+1;
+                cardNode.initCard(type, 1)
+                this.cardNodes[i][j] = cardNode;
+                var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, cc.v2(x,y)));
+		        cardNode.runAction(action);
             }
         }
     },
@@ -48,20 +60,15 @@ cc.Class({
     {
         var node = cc.instantiate(this.cardNodePrefab);
         node.setParent(this.cardContent);
-        var x = col*(this.gap+this.cardSizeX) - this.cardSizeX/2;
-        var y = row*(this.gap+this.cardSizeY) - this.cardSizeY/2;
-        cc.log(x,y);
         node.width = this.cardSizeX;
         node.height = this.cardSizeY;
         node.setPosition(position);
-
-        var action = cc.moveTo(1, cc.v2(x,y));
-        node.runAction(action);
-
+    	var cardNode = new CardNode(node)
         // var type = 3;
         // if(type in CardColors)
         //     var color = CardColors[type];
         // else
         //     cc.log("type is error")
-    }
+        return cardNode;
+    },
 });
