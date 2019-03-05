@@ -4,6 +4,7 @@ desc:卡片管理器
 author:Canterer
  */
 var CardNode = require("CardNode");
+const Touch_Min_Length = 4;
 
 cc.Class({
     extends: cc.Component,
@@ -43,7 +44,7 @@ cc.Class({
         		this.cardPositons[i][j] = cc.v2(x,y)
                 var cardNode = this.createCard(i,j, cc.v2(x, 2000));
                 delay = delay + 0.1;
-                var type = Math.round(Math.random()*2)+1;
+                var type = Math.floor(cc.random0To1()*2)+1;
                 cardNode.initCard(type, 1)
                 this.cardNodes[i][j] = cardNode;
                 var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, cc.v2(x,y)));
@@ -71,4 +72,38 @@ cc.Class({
         //     cc.log("type is error")
         return cardNode;
     },
+    addEventHandler:function(){
+        this.cardContent.on('touchstart', (event)=>{
+            this.startPoint = event.getLocation();
+        });
+        this.cardContent.on('touchend', (event)=>{
+            this.onTouchEnd(event);
+        });
+        this.cardContent.on('touchcancel', (event)=>{
+            this.onTouchEnd(event);
+        });
+    },
+    onTouchEnd:function(event){
+        this.endPoint = event.getLocation();
+
+        let vec = cc.pSub(this.startPoint, this.endPoint);
+        if( cc.plength(vec) > Touch_Min_Length){
+            if(Math.abs(vec.x) > Math.abs(vec.y))//水平方向
+            {
+                if(vec.x > 0)
+                    this.moveDirection(1);
+                else
+                    this.moveDirection(2);
+            }else{
+                if(vec.y > 0)
+                    this.moveDirection(3);
+                else
+                    this.moveDirection(4);
+            }
+
+        }
+    },
+    moveDirection:function(n){
+        cc.log(n);
+    }
 });
