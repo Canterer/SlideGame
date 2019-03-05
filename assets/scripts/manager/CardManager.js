@@ -4,7 +4,7 @@ desc:卡片管理器
 author:Canterer
  */
 var CardNode = require("CardNode");
-const Touch_Min_Length = 4;
+const Touch_Min_Length = 40;
 
 cc.Class({
     extends: cc.Component,
@@ -51,6 +51,8 @@ cc.Class({
 		        cardNode.runAction(action);
             }
         }
+
+        this.addEventHandler()
     },
 
     start () {
@@ -73,6 +75,16 @@ cc.Class({
         return cardNode;
     },
     addEventHandler:function(){
+        for (var i = 0; i < this.row; ++i) {
+            for (var j =  0; j < this.col; ++j) {
+                var cardNode = this.cardNodes[i][j];
+                cardNode.prefab.on('touchstart', (event)=>{
+                    // this.touchCard = this.cardNodes[i][j];
+                    this.touchI = i;
+                    this.touchJ = j;
+                });
+            }
+        }
         this.cardContent.on('touchstart', (event)=>{
             this.startPoint = event.getLocation();
         });
@@ -86,8 +98,8 @@ cc.Class({
     onTouchEnd:function(event){
         this.endPoint = event.getLocation();
 
-        let vec = cc.pSub(this.startPoint, this.endPoint);
-        if( cc.plength(vec) > Touch_Min_Length){
+        let vec = this.endPoint.subSelf(this.startPoint);
+        if( vec.mag() > Touch_Min_Length){
             if(Math.abs(vec.x) > Math.abs(vec.y))//水平方向
             {
                 if(vec.x > 0)
@@ -100,10 +112,32 @@ cc.Class({
                 else
                     this.moveDirection(4);
             }
-
         }
+
+        this.touchCard = null;
     },
     moveDirection:function(n){
-        cc.log(n);
+        if(n==1)
+            cc.log("向右");
+        else if( n==2)
+            cc.log("向左");
+        else if( n==3)
+            cc.log("向上");
+        else
+            cc.log("向下");
+
+        var object = new Error("ttt");
+        var description = "111111111"; 
+        // for(var i in object){
+        //     cc.log(i);
+        //     cc.log(object[i]);
+        //     // var property=object[i]; 
+        //     // description+= i+" = "+property+"\n"; 
+        // }
+        // cc.log(object.stack)
+        cc.log(description);
+        cc.log(this.touchI, this.touchJ)
+        // cc.log(new Error().stack,this.touchI, this.touchJ);
     }
+
 });
