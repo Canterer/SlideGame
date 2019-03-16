@@ -44,7 +44,7 @@ cc.Class({
         		this.cardPositons[i][j] = cc.v2(x,y)
                 var cardNode = this.createCard(i,j, cc.v2(x, 2000));
                 delay = delay + 0.1;
-                var type = Math.floor(cc.random0To1()*2)+1;
+                var type = Math.floor(Math.random()*2)+1;
                 cardNode.initCard(type, 1)
                 this.cardNodes[i][j] = cardNode;
                 var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, cc.v2(x,y)));
@@ -75,18 +75,23 @@ cc.Class({
         return cardNode;
     },
     addEventHandler:function(){
+        cc.log("type is error")
         for (var i = 0; i < this.row; ++i) {
             for (var j =  0; j < this.col; ++j) {
                 var cardNode = this.cardNodes[i][j];
-                cardNode.prefab.on('touchstart', (event)=>{
-                    // this.touchCard = this.cardNodes[i][j];
-                    this.touchI = i;
-                    this.touchJ = j;
-                });
+                // cardNode.prefab.on('touchstart', (event)=>{
+                //     // this.touchCard = this.cardNodes[i][j];
+                //     this.touchI = i;
+                //     this.touchJ = j;
+                //     cc.log(this.touchI, this.touchJ)
+                // });
             }
         }
         this.cardContent.on('touchstart', (event)=>{
             this.startPoint = event.getLocation();
+            var target = event.getCurrentTarget();
+            var locationInNode = target.convertToNodeSpace(this.startPoint)
+            contains(locationInNode)
         });
         this.cardContent.on('touchend', (event)=>{
             this.onTouchEnd(event);
@@ -97,8 +102,9 @@ cc.Class({
     },
     onTouchEnd:function(event){
         this.endPoint = event.getLocation();
-
-        let vec = this.endPoint.subSelf(this.startPoint);
+        cc.log(this.startPoint)
+        cc.log(this.endPoint)
+        var vec = this.endPoint.subSelf(this.startPoint);
         if( vec.mag() > Touch_Min_Length){
             if(Math.abs(vec.x) > Math.abs(vec.y))//水平方向
             {
@@ -139,5 +145,4 @@ cc.Class({
         cc.log(this.touchI, this.touchJ)
         // cc.log(new Error().stack,this.touchI, this.touchJ);
     }
-
 });
