@@ -10,9 +10,9 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        row: 8,//卡牌行数
-        col: 5,//卡牌列数
-        gap: 40,//卡牌间距
+        row: 0,//卡牌行数
+        col: 0,//卡牌列数
+        gap: 0,//卡牌间距
         squareFlag: false,
         cardNodePrefab:{
             default: null,
@@ -75,7 +75,6 @@ cc.Class({
         return cardNode;
     },
     addEventHandler:function(){
-        cc.log("type is error")
         for (var i = 0; i < this.row; ++i) {
             for (var j =  0; j < this.col; ++j) {
                 var cardNode = this.cardNodes[i][j];
@@ -88,10 +87,11 @@ cc.Class({
             }
         }
         this.cardContent.on('touchstart', (event)=>{
+            cc.log("touchstart")
             this.startPoint = event.getLocation();
             var target = event.getCurrentTarget();
-            var locationInNode = target.convertToNodeSpace(this.startPoint)
-            contains(locationInNode)
+            var locationInNode = target.convertToNodeSpace(this.startPoint);
+            // contains(locationInNode);
         });
         this.cardContent.on('touchend', (event)=>{
             this.onTouchEnd(event);
@@ -102,13 +102,14 @@ cc.Class({
     },
     onTouchEnd:function(event){
         this.endPoint = event.getLocation();
-        cc.log(this.startPoint)
-        cc.log(this.endPoint)
-        var vec = this.endPoint.subSelf(this.startPoint);
+        var vec = this.endPoint.sub(this.startPoint);
+        this.ZS(this.startPoint);
+        this.ZS(this.endPoint);
+        this.ZS(vec);
         if( vec.mag() > Touch_Min_Length){
-            if(Math.abs(vec.x) > Math.abs(vec.y))//水平方向
+            if(Math.abs(vec.X) > Math.abs(vec.y))//水平方向
             {
-                if(vec.x > 0)
+                if(vec.X > 0)
                     this.moveDirection(1);
                 else
                     this.moveDirection(2);
@@ -132,17 +133,20 @@ cc.Class({
         else
             cc.log("向下");
 
-        var object = new Error("ttt");
-        var description = "111111111"; 
-        // for(var i in object){
-        //     cc.log(i);
-        //     cc.log(object[i]);
-        //     // var property=object[i]; 
-        //     // description+= i+" = "+property+"\n"; 
-        // }
-        // cc.log(object.stack)
-        cc.log(description);
-        cc.log(this.touchI, this.touchJ)
+        cc.log(n);
+        // cc.log(this.touchI)
+        // cc.log(this.touchJ)
         // cc.log(new Error().stack,this.touchI, this.touchJ);
-    }
+    },
+    ZS:function(object){
+        cc.log("#############");
+        var description = "--------------------------";
+        for(var i in object){
+            if(typeof(object[i]) != "function"){
+                cc.log(i);
+                cc.log(object[i]);
+                cc.log(description);
+            }
+        }
+    },
 });

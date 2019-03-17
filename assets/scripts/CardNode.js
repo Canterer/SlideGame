@@ -17,9 +17,10 @@ var CardNode = cc.Class({
 
     ctor:function(node){
         this.prefab = node;
-        var label = this.prefab.getChildByName("Num");
-        var sprite = this.prefab.getChildByName("Sprite");
-        this.numLabel = label.getComponent(cc.Label);
+        
+        // var label = this.prefab.getChildByName("Num");
+        // var sprite = this.prefab.getChildByName("Sprite");
+        // this.numLabel = label.getComponent(cc.Label);
         // this.type = type;
         // this.num = num;
         // this.cardColor = CardColors[this.type];
@@ -35,18 +36,17 @@ var CardNode = cc.Class({
     {
         if(type in CardColors){
             this.type = type;
-            this.prefab.color = CardColors[type];
-            
-            this.num = num;
-            this.numLabel.string = this.num;
+            // this.prefab.color = CardColors[type];
         }else
             cc.log("type not in CardType: "+type);
+        this.updateCard(num);
     },
 
     updateCard:function(num)
     {
         this.num = num;
-        this.numLabel.string = this.num;
+        // this.numLabel.string = this.num;
+        // 
     }
 });
 
