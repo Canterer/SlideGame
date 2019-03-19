@@ -5,6 +5,7 @@ author:Canterer
  */
 const CardType = require('CardEnum').CardType;
 var CardColors = require('CardEnum').CardColors;
+var AssetsManager = require('AssetsManager');
 
 var CardNode = cc.Class({
     // name = "CardNode",
@@ -17,9 +18,8 @@ var CardNode = cc.Class({
 
     ctor:function(node){
         this.prefab = node;
-        
+        self.sprite = node.getComponent(cc.Sprite)
         // var label = this.prefab.getChildByName("Num");
-        // var sprite = this.prefab.getChildByName("Sprite");
         // this.numLabel = label.getComponent(cc.Label);
         // this.type = type;
         // this.num = num;
@@ -46,7 +46,14 @@ var CardNode = cc.Class({
     {
         this.num = num;
         // this.numLabel.string = this.num;
-        // 
+        var path = "UI/"+this.type+"_"+this.num;
+        AssetsManager.loadAssets(path, cc.SpriteFrame, (error, res)=>{
+            if(error){
+                cc.error(error);
+                return;
+            }
+            self.sprite.spriteFrame = res;
+        });
     }
 });
 
