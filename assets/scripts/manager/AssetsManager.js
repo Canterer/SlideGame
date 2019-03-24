@@ -37,7 +37,7 @@ var AssetsManager = cc.Class({
     },
 
     autoReleaseAll:function(path, type){
-
+        
     }
 });
 

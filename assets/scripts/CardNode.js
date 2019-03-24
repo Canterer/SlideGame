@@ -1,6 +1,6 @@
 /*
-module:CardManager
-desc:卡片管理器
+module:CardNode
+desc:卡片节点
 author:Canterer
  */
 const CardType = require('CardEnum').CardType;
@@ -18,43 +18,38 @@ var CardNode = cc.Class({
 
     ctor:function(node){
         this.prefab = node;
-        self.sprite = node.getComponent(cc.Sprite)
-        // var label = this.prefab.getChildByName("Num");
-        // this.numLabel = label.getComponent(cc.Label);
-        // this.type = type;
-        // this.num = num;
-        // this.cardColor = CardColors[this.type];
-        // if(this.type == CardType.Money)//mast
-        
+        this.sprite = node.getComponent(cc.Sprite);
     },
 
     runAction:function(action){
         this.prefab.runAction(action);
     },
-
+    setPosition:function(position){
+        this.prefab.setPosition(position);
+    },
     initCard:function(type, num)
     {
-        if(type in CardColors){
-            this.type = type;
-            // this.prefab.color = CardColors[type];
-        }else
-            cc.log("type not in CardType: "+type);
-        this.updateCard(num);
-    },
-
-    updateCard:function(num)
-    {
+        // if(type in CardColors){
+        //     this.type = type;
+        //     // this.prefab.color = CardColors[type];
+        // }else
+        //     cc.log("type not in CardType: "+type);   
+        this.type = type;
         this.num = num;
-        // this.numLabel.string = this.num;
-        var path = "UI/"+this.type+"_"+this.num;
-        AssetsManager.loadAssets(path, cc.SpriteFrame, (error, res)=>{
+        this.updateCard(type, num);
+    },
+    updateCard:function(type, num)
+    {
+        this.type = type;
+        this.num = num;
+        cc.loader.loadRes("UI/"+type+"_"+num, cc.SpriteFrame, (error, spriteFrame)=>{
             if(error){
-                cc.error(error);
+                cc.log(error);
                 return;
             }
-            self.sprite.spriteFrame = res;
-        });
-    }
+            this.sprite.spriteFrame = spriteFrame;
+        });       
+    },
 });
 
 module.exports = CardNode;
