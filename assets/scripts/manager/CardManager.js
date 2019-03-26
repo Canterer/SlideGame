@@ -26,33 +26,50 @@ cc.Class({
     },
 
     onLoad:function(){
-        this.cardPositons = [];
         this.cardNodes = [];
+        this.cardNodeMap = [];
         this.adaptiveLayout();
 
         var delay = 0;
-        for (var i = 0; i < this.row; ++i) {
-        	this.cardPositons[i] = [];
-        	this.cardNodes[i] = [];
+        var index = 0;
+        var size = cc.size(this.cardSizeX, this.cardSizeY);
+        for (var i = 1; i <= this.row; ++i) {
+            this.cardNodeMap[i] = [];
             cc.log(this.offsetX, this.offsetY);
-            for (var j =  0; j < this.col; ++j) {
-                var x = j*(this.gapX + this.cardSizeX) + this.cardSizeX/2 + this.gapX + this.offsetX;
-        		var y = i*(this.gapY + this.cardSizeY) + this.cardSizeY/2 + this.gapY + this.offsetY;
-                var cardNode = this.createCard(i,j, cc.v2(x, 2000));
-                this.cardPositons[i][j] = cc.v2(x,y);
-                this.cardNodes[i][j] = cardNode;
+            for (var j =  1; j <= this.col; ++j) {
+                var x = j*(this.gapX + this.cardSizeX) - this.cardSizeX/2 + this.offsetX;
+        		var y = i*(this.gapY + this.cardSizeY) - this.cardSizeY/2 + this.offsetY;
+                var position = cc.v2(x,y);
+                this.initCardBg(i, j, size, position);
+
                 delay = delay + 0.1;
-                var type = Math.floor(Math.random()*2) + 1;
-                cardNode.initCard(type, 1);
-                var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, cc.v2(x,y)));
-		        cardNode.runAction(action);
+                var type = Math.floor(Math.random()*3) + 1;
+                // var cardNode = this.createCard(type, 1, cc.v2(x, 2000));
+                // this.cardNodes[index] = cardNode;
+                this.cardNodeMap[i][j] = index;
+          //       var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, position));
+		        // cardNode.runAction(action);
             }
         }
-        this.addEventHandler();
+        // this.addEventHandler();
     },
 
     start () {
 
+    },
+
+    initCardBg:function(row, col, size, position){
+        var node = new cc.Node('cardBg_' + row + "_" + col);
+        var sprite = node.addComponent(cc.Sprite);
+        node.setContentSize(size);
+        node.setParent(self.cardContent);
+        node.setPosition(position);
+        node.on('touchstart', (event)=>{
+            this.touchRow = row;
+            this.touchCol = col;
+            this.startPoint = event.getLocation();
+            cc.log(this.touchRow,this.touchCol);
+        });
     },
 
     // 自适应布局
@@ -63,7 +80,8 @@ cc.Class({
         this.cardContent.height = contentHeight + this.offsetY;
     },
 
-    createCard:function(row, col, position)
+    // 创建单个卡牌 并指定位置
+    createCard:function(type, num, position)
     {
         var node = cc.instantiate(this.cardNodePrefab);
         node.setParent(this.cardContent);
@@ -71,46 +89,22 @@ cc.Class({
         node.height = this.cardSizeY;
         node.setPosition(position);
     	var cardNode = new CardNode(node)
-        // var type = 3;
-        // if(type in CardColors)
-        //     var color = CardColors[type];
-        // else
-        //     cc.log("type is error")
+        cardNode:updateCard(type, num)
         return cardNode;
     },
-    // updateSprite:function(){
-    //     cc.loader.loadResDir("UI", cc.SpriteFrame, function(error, spriteFrames){
-    //         if(error){
-    //             cc.log(error);
-    //             return;
-    //         }
-    //         this.spriteFrames = []
-    //         for (var i = 0; i < 3; ++i) { 
-    //             this.spriteFrames[i+1] = []
-    //             for (var j =  1; j <= 8; ++j) {
-    //                 this.spriteFrames[i+1][j] = spriteFrames[i*8+j];
-    //             }
-    //         }
-    //         for (var i = 0; i < this.row; ++i) {
-    //             for (var j =  0; j < this.col; ++j) {
-    //                 var node = this.cardNodes[i][j];
-    //                 node:updateSprite(this.spriteFrames[i])
-    //             }
-    //         }
-    //     });
-    // },
+
     addEventHandler:function(){
-        for (let i = 0; i < this.row; ++i) {
-            for (let j =  0; j < this.col; ++j) {
-                var cardNode = this.cardNodes[i][j];
-                cardNode.prefab.on('touchstart', (event)=>{
-                    this.touchI = i;
-                    this.touchJ = j;
-                    this.startPoint = event.getLocation();
-                    cc.log(this.touchI,this.touchJ);
-                });
-            }
-        }
+        // for (let i = 0; i < this.row; ++i) {
+        //     for (let j =  0; j < this.col; ++j) {
+        //         var cardNode = this.cardNodes[i][j];
+        //         cardNode.prefab.on('touchstart', (event)=>{
+        //             this.touchI = i;
+        //             this.touchJ = j;
+        //             this.startPoint = event.getLocation();
+        //             cc.log(this.touchI,this.touchJ);
+        //         });
+        //     }
+        // }
         this.cardContent.on('touchstart', (event)=>{
             cc.log("touchstart")
             this.startPoint = event.getLocation();

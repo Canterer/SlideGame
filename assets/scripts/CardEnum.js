@@ -1,7 +1,7 @@
 const CardType = cc.Enum({
 	Money : 1,//金币
-	Monster : 2,//怪物
-	Soldier : 3,//守卫
+    Soldier : 2,//守卫
+	Monster : 3,//怪物
 });
 
 var CardColors = cc.Enum({
