@@ -22,6 +22,10 @@ cc.Class({
             default: null,
             type:cc.Prefab
         },
+        cardBgPrefab:{
+            default: null,
+            type:cc.Prefab
+        },
         cardContent: cc.Node
     },
 
@@ -44,25 +48,35 @@ cc.Class({
 
                 delay = delay + 0.1;
                 var type = Math.floor(Math.random()*3) + 1;
-                // var cardNode = this.createCard(type, 1, cc.v2(x, 2000));
-                // this.cardNodes[index] = cardNode;
+                var cardNode = this.createCard(type, 1, cc.v2(x, 2000));
+                this.cardNodes[index] = cardNode;
                 this.cardNodeMap[i][j] = index;
-          //       var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, position));
-		        // cardNode.runAction(action);
+                var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, position));
+		        cardNode.runAction(action);
+                index = index + 1;
             }
         }
-        // this.addEventHandler();
+        this.addEventHandler();
     },
 
     start () {
 
     },
 
+    // 自适应布局  计算居中偏移
+    adaptiveLayout:function(){
+        var offsetX = cc.winSize.width - this.col*(this.cardSizeX+this.gapX) - this.gapX;
+        this.offsetX = this.offsetX + offsetX/2;
+        var contentHeight = this.row*(this.cardSizeY + this.gapY) + this.gapY;
+        this.cardContent.height = contentHeight + this.offsetY;
+    },
+
+    // 创建卡牌背景  用于响应触控事件
     initCardBg:function(row, col, size, position){
-        var node = new cc.Node('cardBg_' + row + "_" + col);
-        var sprite = node.addComponent(cc.Sprite);
+        var node = cc.instantiate(this.cardBgPrefab);
+        node.name = 'cardBg_' + row + "_" + col;
         node.setContentSize(size);
-        node.setParent(self.cardContent);
+        node.setParent(this.cardContent);
         node.setPosition(position);
         node.on('touchstart', (event)=>{
             this.touchRow = row;
@@ -70,14 +84,6 @@ cc.Class({
             this.startPoint = event.getLocation();
             cc.log(this.touchRow,this.touchCol);
         });
-    },
-
-    // 自适应布局
-    adaptiveLayout:function(){
-        var offsetX = cc.winSize.width - this.col*(this.cardSizeX+this.gapX) - this.gapX;
-        this.offsetX = this.offsetX + offsetX/2;
-        var contentHeight = this.row*(this.cardSizeY + this.gapY) + this.gapY;
-        this.cardContent.height = contentHeight + this.offsetY;
     },
 
     // 创建单个卡牌 并指定位置
@@ -88,28 +94,16 @@ cc.Class({
         node.width = this.cardSizeX;
         node.height = this.cardSizeY;
         node.setPosition(position);
-    	var cardNode = new CardNode(node)
-        cardNode:updateCard(type, num)
+    	var cardNode = new CardNode(node);
+        cardNode.updateCard(type, num);
         return cardNode;
     },
 
     addEventHandler:function(){
-        // for (let i = 0; i < this.row; ++i) {
-        //     for (let j =  0; j < this.col; ++j) {
-        //         var cardNode = this.cardNodes[i][j];
-        //         cardNode.prefab.on('touchstart', (event)=>{
-        //             this.touchI = i;
-        //             this.touchJ = j;
-        //             this.startPoint = event.getLocation();
-        //             cc.log(this.touchI,this.touchJ);
-        //         });
-        //     }
-        // }
+        // 触控开始事件 被子物体给戒断了
         this.cardContent.on('touchstart', (event)=>{
             cc.log("touchstart")
-            this.startPoint = event.getLocation();
-            // var target = event.getCurrentTarget();
-            // var locationInNode = target.convertToNodeSpace(this.startPoint);
+            // this.startPoint = event.getLocation();
         }, true);
         this.cardContent.on('touchend', (event)=>{
             this.onTouchEnd(event);
@@ -122,7 +116,7 @@ cc.Class({
         this.endPoint = event.getLocation();
         var vec = this.endPoint.sub(this.startPoint);
         if( vec.mag() > Touch_Min_Length){
-            if(this.touchI == null || this.touchJ == null)
+            if(this.touchRow == null || this.touchCol == null)
                 return;
             if(Math.abs(vec.x) > Math.abs(vec.y)){//水平方向
                 if(vec.x > 0)
@@ -136,40 +130,47 @@ cc.Class({
                     this.moveDirection(4);
             }
         }
-        this.touchI = null;
-        this.touchJ = null;
+        this.touchRow = null;
+        this.touchCol = null;
     },
+
     moveDirection:function(n){
         // 1 向右 2 向左 3 向上 4 向下
         if(n==1)
             cc.log("向右");
         else if( n==2)
-            this.moveLeft();
+            this.touchMoveLeft();
         else if( n==3)
             cc.log("向上");
         else
             cc.log("向下");
     },
 
-    moveLeft:function(){
+    touchMoveLeft:function(){
         cc.log("向左");
-        cc.log(this.touchI, this.touchJ);
-        if(this.touchJ < 1)
+        cc.log(this.touchRow, this.touchCol);
+        if(this.touchCol < 1)// 不能左移
             return;
-        var targetI = this.touchI;
-        var targetJ = this.touchJ - 1;
-        var touchNode = this.cardNodes[this.touchI][this.touchJ];
-        var targetNode = this.cardNodes[targetI][targetJ];
+        var touchIndex = this.cardNodeMap[this.touchRow][this.touchCol];
+        var targetIndex = touchIndex - 1
+        cc.log(touchIndex)
+        var touchNode = this.cardNodes[touchIndex];
+        var targetNode = this.cardNodes[targetIndex];
+        cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.type == targetNode.type && touchNode.num == targetNode.num){
+            // 隐藏目标 并位移至最右边
             var x = this.col*(this.gapX + this.cardSizeX) + this.cardSizeX/2 + this.gapX + this.offsetX;
             targetNode.setPosition(cc.v2(x, targetNode.prefab.y));
-            for (var j = this.touchJ; j < this.col; ++j) {
-                let node = this.cardNodes[this.touchI][j];
-                this.cardNodes[this.touchI][j-1] = node;
+            // 左移 当前点击卡牌及其右边所有卡牌
+            for (var j = this.touchCol; j <= this.col; ++j) {
+                let index = touchIndex + j - this.touchCol;
+                let node = this.cardNodes[index];
+                this.cardNodeMap[this.touchRow][j-1] = index;//更新映射
                 let action = cc.moveBy(1, cc.v2(-this.cardSizeX-this.gapX, 0));
                 node.runAction(action);
             }
-            this.cardNodes[this.touchI][this.col-1] = targetNode;
+            // 左移新增卡牌
+            this.cardNodeMap[this.touchRow][this.col] = targetIndex;//更新映射
             let action = cc.moveBy(1, cc.v2(-this.cardSizeX-this.gapX, 0));
             targetNode.runAction(action);
             cc.log(touchNode.type, touchNode.num);
