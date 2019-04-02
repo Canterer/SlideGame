@@ -1,15 +1,15 @@
 {
   "ver": "2.2.0",
-  "uuid": "7ece29d5-980d-4e02-8125-3ce9ddad52df",
+  "uuid": "f95ab246-c0a8-43ca-97bc-d8a4f180b250",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "subMetas": {
-    "游戏规则": {
+    "Rank": {
       "ver": "1.0.3",
-      "uuid": "eb40fbd6-2a45-497b-8c7f-d50233f603bc",
-      "rawTextureUuid": "7ece29d5-980d-4e02-8125-3ce9ddad52df",
+      "uuid": "2d1c681b-7819-4b81-954e-68f5d265c944",
+      "rawTextureUuid": "f95ab246-c0a8-43ca-97bc-d8a4f180b250",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

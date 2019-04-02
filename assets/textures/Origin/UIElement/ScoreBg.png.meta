@@ -6,7 +6,7 @@
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "subMetas": {
-    "计分框": {
+    "ScoreBg": {
       "ver": "1.0.3",
       "uuid": "fa1b8f3c-4665-4699-801b-423ded2c7682",
       "rawTextureUuid": "c915979d-d345-4576-ba20-3b23556e5be2",
