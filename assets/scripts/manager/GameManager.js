@@ -30,6 +30,12 @@ cc.Class({
     changeScene:function() {
         cc.director.loadScene("MainGame");
     },
+    returnStartScene:function() {
+        cc.director.loadScene("StartGame");
+    },
+    exitScene:function(){
+
+    },
 });
 
 // module.exports = GameManager.Instance;

@@ -2,12 +2,12 @@ window.__require = function t(e, c, o) {
 function i(s, r) {
 if (!c[s]) {
 if (!e[s]) {
-var h = s.split("/");
-h = h[h.length - 1];
-if (!e[h]) {
-var n = "function" == typeof __require && __require;
-if (!r && n) return n(h, !0);
-if (a) return a(h, !0);
+var n = s.split("/");
+n = n[n.length - 1];
+if (!e[n]) {
+var h = "function" == typeof __require && __require;
+if (!r && h) return h(n, !0);
+if (a) return a(n, !0);
 throw new Error("Cannot find module '" + s + "'");
 }
 }
@@ -182,11 +182,11 @@ for (var i = 1; i <= this.col; ++i) {
 var a = i * (this.gapX + this.cardSizeX) - this.cardSizeX / 2 - this.gapX + this.offsetX, s = o * (this.gapY + this.cardSizeY) - this.cardSizeY / 2 - this.gapY + this.offsetY, r = cc.v2(a, s);
 this.initCardBg(o, i, c, r);
 t += .1;
-var h = Math.floor(3 * Math.random()) + 1, n = this.createCard(h, 1, cc.v2(a, 2e3));
-this.cardNodes[e] = n;
+var n = Math.floor(3 * Math.random()) + 1, h = this.createCard(n, 1, cc.v2(a, 2e3));
+this.cardNodes[e] = h;
 this.cardNodeMap[o][i] = e;
 var d = cc.sequence(cc.delayTime(t), cc.moveTo(1, r));
-n.runAction(d);
+h.runAction(d);
 e += 1;
 }
 }
@@ -266,10 +266,10 @@ var i = -this.gapX - this.cardSizeX / 2 + this.offsetX, a = Math.floor(3 * Math.
 o.updateCard(a, 1);
 o.setPosition(cc.v2(i, o.prefab.y));
 for (var s = this.touchCol; s >= 1; --s) {
-var r = this.cardNodeMap[this.touchRow][s], h = this.cardNodes[r];
+var r = this.cardNodeMap[this.touchRow][s], n = this.cardNodes[r];
 this.cardNodeMap[this.touchRow][s + 1] = r;
-var n = cc.moveBy(this.moveTime, cc.v2(this.cardSizeX + this.gapX, 0));
-h.runAction(n);
+var h = cc.moveBy(this.moveTime, cc.v2(this.cardSizeX + this.gapX, 0));
+n.runAction(h);
 }
 this.cardNodeMap[this.touchRow][1] = e;
 var d = cc.moveBy(this.moveTime, cc.v2(this.cardSizeX + this.gapX, 0));
@@ -288,10 +288,10 @@ var i = this.col * (this.gapX + this.cardSizeX) + this.cardSizeX / 2 + this.offs
 o.updateCard(a, 1);
 o.setPosition(cc.v2(i, o.prefab.y));
 for (var s = this.touchCol; s <= this.col; ++s) {
-var r = this.cardNodeMap[this.touchRow][s], h = this.cardNodes[r];
+var r = this.cardNodeMap[this.touchRow][s], n = this.cardNodes[r];
 this.cardNodeMap[this.touchRow][s - 1] = r;
-var n = cc.moveBy(this.moveTime, cc.v2(-this.cardSizeX - this.gapX, 0));
-h.runAction(n);
+var h = cc.moveBy(this.moveTime, cc.v2(-this.cardSizeX - this.gapX, 0));
+n.runAction(h);
 }
 this.cardNodeMap[this.touchRow][this.col] = e;
 var d = cc.moveBy(this.moveTime, cc.v2(-this.cardSizeX - this.gapX, 0));
@@ -310,10 +310,10 @@ var i = -this.gapY - this.cardSizeY / 2 + this.offsetY, a = Math.floor(3 * Math.
 o.updateCard(a, 1);
 o.setPosition(cc.v2(o.prefab.x, i));
 for (var s = this.touchRow; s >= 1; --s) {
-var r = this.cardNodeMap[s][this.touchCol], h = this.cardNodes[r];
+var r = this.cardNodeMap[s][this.touchCol], n = this.cardNodes[r];
 this.cardNodeMap[s + 1][this.touchCol] = r;
-var n = cc.moveBy(this.moveTime, cc.v2(0, this.cardSizeY + this.gapY));
-h.runAction(n);
+var h = cc.moveBy(this.moveTime, cc.v2(0, this.cardSizeY + this.gapY));
+n.runAction(h);
 }
 this.cardNodeMap[1][this.touchCol] = e;
 var d = cc.moveBy(this.moveTime, cc.v2(0, this.cardSizeY + this.gapY));
@@ -332,10 +332,10 @@ var i = this.row * (this.gapY + this.cardSizeY) + this.cardSizeY / 2 + this.offs
 o.updateCard(a, 1);
 o.setPosition(cc.v2(o.prefab.x, i));
 for (var s = this.touchRow; s <= this.row; ++s) {
-var r = this.cardNodeMap[s][this.touchCol], h = this.cardNodes[r];
+var r = this.cardNodeMap[s][this.touchCol], n = this.cardNodes[r];
 this.cardNodeMap[s - 1][this.touchCol] = r;
-var n = cc.moveBy(this.moveTime, cc.v2(0, -this.cardSizeY - this.gapY));
-h.runAction(n);
+var h = cc.moveBy(this.moveTime, cc.v2(0, -this.cardSizeY - this.gapY));
+n.runAction(h);
 }
 this.cardNodeMap[this.row][this.touchCol] = e;
 var d = cc.moveBy(this.moveTime, cc.v2(0, -this.cardSizeY - this.gapY));
@@ -354,20 +354,20 @@ if (t > 1) {
 var s;
 for (o = 1; o <= this.col; ++o) {
 r = this.cardNodeMap[t][o];
-n = this.cardNodes[r];
+h = this.cardNodes[r];
 r = this.cardNodeMap[t - 1][o];
 s = this.cardNodes[r];
-if (n.checkMerge(s, !0)) return !1;
+if (h.checkMerge(s, !0)) return !1;
 }
 }
 if (t < self.row) {
-var r, h, n;
+var r, n, h;
 for (o = 1; o <= this.col; ++o) {
 r = this.cardNodeMap[t][o];
-n = this.cardNodes[r];
-r = this.cardNodeMap[t + 1][o];
 h = this.cardNodes[r];
-if (n.checkMerge(h, !0)) return !1;
+r = this.cardNodeMap[t + 1][o];
+n = this.cardNodes[r];
+if (h.checkMerge(n, !0)) return !1;
 }
 }
 return !1;
@@ -382,20 +382,20 @@ if (t > 1) {
 var s;
 for (o = 1; o <= this.row; ++o) {
 r = this.cardNodeMap[o][t];
-n = this.cardNodes[r];
+h = this.cardNodes[r];
 r = this.cardNodeMap[o][t - 1];
 s = this.cardNodes[r];
-if (n.checkMerge(s, !0)) return !0;
+if (h.checkMerge(s, !0)) return !0;
 }
 }
 if (t < self.col) {
-var r, h, n;
+var r, n, h;
 for (o = 1; o <= this.row; ++o) {
 r = this.cardNodeMap[o][t];
-n = this.cardNodes[r];
-r = this.cardNodeMap[o][t + 1];
 h = this.cardNodes[r];
-if (n.checkMerge(h, !0)) return !0;
+r = this.cardNodeMap[o][t + 1];
+n = this.cardNodes[r];
+if (h.checkMerge(n, !0)) return !0;
 }
 }
 return !1;
@@ -410,11 +410,11 @@ this.gameOverLayer.active = !1;
 for (var t = 0, e = (cc.size(this.cardSizeX, this.cardSizeY), 1); e <= this.row; ++e) for (var c = 1; c <= this.col; ++c) {
 var o = c * (this.gapX + this.cardSizeX) - this.cardSizeX / 2 - this.gapX + this.offsetX, i = e * (this.gapY + this.cardSizeY) - this.cardSizeY / 2 - this.gapY + this.offsetY, a = cc.v2(o, i);
 t += .1;
-var s = Math.floor(3 * Math.random()) + 1, r = this.cardNodeMap[e][c], h = this.cardNodes[r];
-h.updateCard(s, 1);
-h.setPosition(cc.v2(o, 2e3));
-var n = cc.sequence(cc.delayTime(t), cc.moveTo(1, a));
-h.runAction(n);
+var s = Math.floor(3 * Math.random()) + 1, r = this.cardNodeMap[e][c], n = this.cardNodes[r];
+n.updateCard(s, 1);
+n.setPosition(cc.v2(o, 2e3));
+var h = cc.sequence(cc.delayTime(t), cc.moveTo(1, a));
+n.runAction(h);
 }
 for (e = 1; e <= this.row; ++e) this.cardRowFlag[e] = this.checkRow(e);
 for (c = 1; c <= this.col; ++c) this.cardColFlag[c] = this.checkCol(c);
@@ -498,7 +498,11 @@ return this.audioManager;
 },
 changeScene: function() {
 cc.director.loadScene("MainGame");
-}
+},
+returnStartScene: function() {
+cc.director.loadScene("StartGame");
+},
+exitScene: function() {}
 });
 cc._RF.pop();
 }, {} ],
