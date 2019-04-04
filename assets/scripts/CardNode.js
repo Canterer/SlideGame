@@ -42,30 +42,38 @@ var CardNode = cc.Class({
     {
         this.type = type;
         this.num = num;
-        cc.loader.loadRes("UI/"+type+"_"+num, cc.SpriteFrame, (error, spriteFrame)=>{
+        // cc.loader.loadRes("UI/"+type+"_"+num, cc.SpriteFrame, (error, spriteFrame)=>{
+        //     if(error){
+        //         cc.log(error);
+        //         return;
+        //     }
+        //     this.sprite.spriteFrame = spriteFrame;
+        // });       
+        cc.loader.loadRes("UI/CardSheet", cc.SpriteAtlas, (error, atlas)=>{
             if(error){
                 cc.log(error);
                 return;
             }
-            this.sprite.spriteFrame = spriteFrame;
+            this.sprite.spriteFrame = atlas.getSpriteFrame(type+"_"+num);
         });       
     },
     // 检测是否可以合并target  noDirect若为true代表 检测相互合并 不代表方向
     checkMerge:function(target, noDirect){
-        if(this.type == CardType.Soldier){
-            if(target.type == CardType.Soldier)//同数字守卫之间可以合并
+        if(this.type == target.type)//同类型同数字可以合并
                 return this.num == target.num;
-            else
-                return this.num >= target.num;//小于守卫数据的金币、怪物可以被合并
-        }else if(this.type == CardType.Money){//同数字金币之间可以合并
-            if(this.type == target.type)
-                return this.num == target.num;
-        } 
+        if(this.type == CardType.Soldier)//小于守卫数据的金币、怪物可以被合并
+            return this.num >= target.num; 
         if(noDirect){//不判断方向
             return target.type == CardType.Soldier && this.num <= target.num;
         }
         return false;
     },
+
+    getMergeScore:function(target){
+        if(target.type == CardType.Monster)
+            return Math.pow(2,target.num);
+        return 0;
+    }
 });
 
 module.exports = CardNode;

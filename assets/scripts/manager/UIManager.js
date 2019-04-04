@@ -3,7 +3,7 @@ module:UIManager
 desc:UI元素管理器
 author:Canterer
  */
-cc.Class({
+var UIManager = cc.Class({
     extends: cc.Component,
 
     properties: {
@@ -14,7 +14,20 @@ cc.Class({
         soldierMaxLabel : cc.Label
 
     },
-    start () {
-    	
+    onLoad:function () {
     },
+    start () {
+        self.score = 0	
+    },
+    updateScore:function(num){
+        self.score = num;
+        self.scoreLabel.string = self.score;
+    },
+    addScore:function(num){
+        self.score += num;
+        cc.log(self.score);
+        self.scoreLabel.string = self.score;
+    }
 });
+
+module.exports = UIManager;

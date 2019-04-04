@@ -1,4 +1,4 @@
-Executable : G:\Android\NDK\android-ndk-r17c\ndk-build.cmd
+Executable : E:\WorkSofts\Android\Ndk\android-ndk-r17c\ndk-build.cmd
 arguments : 
 NDK_PROJECT_PATH=null
 APP_BUILD_SCRIPT=F:\ZS\Space\CocosProjects\SlideGame\build\jsb-link\frameworks\runtime-src\proj.android-studio\app\jni\Android.mk

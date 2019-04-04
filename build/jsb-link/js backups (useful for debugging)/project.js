@@ -65,10 +65,24 @@ properties: {
 audioNames: [ cc.String ],
 audioList: [ cc.AudioClip ]
 },
-start: function() {},
+start: function() {
+self.bgMusicIndex = -1;
+self.bgMusicId = null;
+},
 playMusic: function() {
-var t = this.getSFX("bgm2");
-cc.audioEngine.playMusic(t, !0);
+this.playNextBgMusic();
+},
+playNextBgMusic: function() {
+self.bgMusicIndex += 1;
+self.bgMusicIndex %= 4;
+cc.loader.loadRes("AudiobgMusic" + self.bgMusicIndex, cc.AudioClip, function(t, e) {
+if (t) cc.log(t); else {
+self.bgMusicId = cc.audioEngine.playMusic(e, !1);
+cc.audioEngine.setFinishCallback(self.bgMusicId, function() {
+this.playNextBgMusic();
+});
+}
+});
 },
 pauseMusic: function() {
 cc.audioEngine.pauseMusic();
@@ -145,6 +159,7 @@ CardManager: [ function(t, e, c) {
 "use strict";
 cc._RF.push(e, "3e43caRsz9NIaO2N5Bcc9Xs", "CardManager");
 var o = t("CardNode");
+t("GameManager");
 cc.Class({
 extends: cc.Component,
 properties: {
@@ -431,7 +446,8 @@ cc.log("--------------------------");
 });
 cc._RF.pop();
 }, {
-CardNode: "CardNode"
+CardNode: "CardNode",
+GameManager: "GameManager"
 } ],
 CardNode: [ function(t, e, c) {
 "use strict";
@@ -463,12 +479,12 @@ updateCard: function(t, e) {
 var c = this;
 this.type = t;
 this.num = e;
-cc.loader.loadRes("UI/" + t + "_" + e, cc.SpriteFrame, function(t, e) {
-t ? cc.log(t) : c.sprite.spriteFrame = e;
+cc.loader.loadRes("UI/CardSheet", cc.SpriteAtlas, function(o, i) {
+o ? cc.log(o) : c.sprite.spriteFrame = i.getSpriteFrame(t + "_" + e);
 });
 },
 checkMerge: function(t, e) {
-return this.type == o.Soldier ? t.type == o.Soldier ? this.num == t.num : this.num >= t.num : this.type == o.Money && this.type == t.type ? this.num == t.num : !!e && (t.type == o.Soldier && this.num <= t.num);
+return this.type == t.type ? this.num == t.num : this.type == o.Soldier ? this.num >= t.num : !!e && (t.type == o.Soldier && this.num <= t.num);
 }
 }));
 e.exports = i;
@@ -480,7 +496,7 @@ CardEnum: "CardEnum"
 GameManager: [ function(t, e, c) {
 "use strict";
 cc._RF.push(e, "b494aEECoRIarWphe92vd4B", "GameManager");
-cc.Class({
+var o = new (cc.Class({
 extends: cc.Component,
 properties: {
 audioManager: cc.Node
@@ -503,7 +519,8 @@ returnStartScene: function() {
 cc.director.loadScene("StartGame");
 },
 exitScene: function() {}
-});
+}))();
+e.exports = o;
 cc._RF.pop();
 }, {} ],
 UIManager: [ function(t, e, c) {
@@ -518,7 +535,13 @@ moneyMaxLabel: cc.Label,
 monsterMaxLabel: cc.Label,
 soldierMaxLabel: cc.Label
 },
-start: function() {}
+start: function() {
+self.score = 0;
+},
+updateScore: function(t) {
+self.score += t;
+self.scoreLabel.String = self.score;
+}
 });
 cc._RF.pop();
 }, {} ]

@@ -4,6 +4,7 @@ desc:卡片管理器
 author:Canterer
  */
 var CardNode = require("CardNode");
+var GameManager = require("GameManager");
 const Touch_Min_Length = 40;
 
 cc.Class({
@@ -31,6 +32,10 @@ cc.Class({
     },
 
     onLoad:function(){
+        var gameMgr = GameManager.getInstance()
+        this.uiManager = gameMgr.getUIManager();
+        ZS(this.uiManager);
+
         this.cardNodes = [];//数组cardNodes
         this.cardNodeMap = [];//记录每行每列的卡牌 在数组cardNodes中的序号
         this.cardRowFlag = [];//记录每行是否可移动
@@ -45,7 +50,6 @@ cc.Class({
         var size = cc.size(this.cardSizeX, this.cardSizeY);
         for (var i = 1; i <= this.row; ++i) {
             this.cardNodeMap[i] = [];
-            cc.log(this.offsetX, this.offsetY);
             for (var j =  1; j <= this.col; ++j) {
                 var x = j*(this.gapX + this.cardSizeX) - this.cardSizeX/2 - this.gapX + this.offsetX;
         		var y = i*(this.gapY + this.cardSizeY) - this.cardSizeY/2 - this.gapY + this.offsetY;
@@ -117,7 +121,7 @@ cc.Class({
     addEventHandler:function(){
         // 触控开始事件 被子物体给戒断了
         this.cardContent.on('touchstart', (event)=>{
-            cc.log("touchstart")
+            // cc.log("touchstart")
             // this.startPoint = event.getLocation();
         }, true);
         this.cardContent.on('touchend', (event)=>{
@@ -161,11 +165,13 @@ cc.Class({
         var targetIndex = this.cardNodeMap[this.touchRow][this.touchCol+1]
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
-        cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
+        // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
             if(touchNode.type == targetNode.type)
                 touchNode.updateCard(touchNode.type, touchNode.num+1);
+            else
+                this.addScore(touchNode.getMergeScore(targetNode));
             // 将目标放置至最左边
             var x = -this.gapX - this.cardSizeX/2 + this.offsetX;
             let type = Math.floor(Math.random()*3) + 1;
@@ -183,7 +189,6 @@ cc.Class({
             this.cardNodeMap[this.touchRow][1] = targetIndex;//更新映射
             let action = cc.moveBy(this.moveTime, cc.v2(this.cardSizeX+this.gapX, 0));
             targetNode.runAction(action);
-            cc.log(touchNode.type, targetNode.type);
         }
     },
 
@@ -194,11 +199,13 @@ cc.Class({
         var targetIndex = this.cardNodeMap[this.touchRow][this.touchCol-1]
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
-        cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
+        // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
             if(touchNode.type == targetNode.type)
                 touchNode.updateCard(touchNode.type, touchNode.num+1);
+            else
+                this.addScore(touchNode.getMergeScore(targetNode));
             // 将目标放置至最右边
             var x = this.col*(this.gapX + this.cardSizeX) + this.cardSizeX/2 + this.offsetX;
             let type = Math.floor(Math.random()*3) + 1;
@@ -216,7 +223,6 @@ cc.Class({
             this.cardNodeMap[this.touchRow][this.col] = targetIndex;//更新映射
             let action = cc.moveBy(this.moveTime, cc.v2(-this.cardSizeX-this.gapX, 0));
             targetNode.runAction(action);
-            cc.log(touchNode.type, targetNode.type);
         }
     },
 
@@ -227,11 +233,13 @@ cc.Class({
         var targetIndex = this.cardNodeMap[this.touchRow+1][this.touchCol]
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
-        cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
+        // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
             if(touchNode.type == targetNode.type)
                 touchNode.updateCard(touchNode.type, touchNode.num+1);
+            else
+                this.addScore(touchNode.getMergeScore(targetNode));
             // 将目标放置至最下边
             var y = -this.gapY - this.cardSizeY/2 + this.offsetY;
             let type = Math.floor(Math.random()*3) + 1;
@@ -249,7 +257,6 @@ cc.Class({
             this.cardNodeMap[1][this.touchCol] = targetIndex;//更新映射
             let action = cc.moveBy(this.moveTime, cc.v2(0,this.cardSizeY+this.gapY));
             targetNode.runAction(action);
-            cc.log(touchNode.type, targetNode.type);
         }
     },
 
@@ -260,11 +267,13 @@ cc.Class({
         var targetIndex = this.cardNodeMap[this.touchRow-1][this.touchCol]
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
-        cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
+        // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
             if(touchNode.type == targetNode.type)
                 touchNode.updateCard(touchNode.type, touchNode.num+1);
+            else
+                this.addScore(touchNode.getMergeScore(targetNode));
             // 将目标放置至最右边
             var y = this.row*(this.gapY + this.cardSizeY) + this.cardSizeY/2 + this.offsetY;
             let type = Math.floor(Math.random()*3) + 1;
@@ -282,7 +291,6 @@ cc.Class({
             this.cardNodeMap[this.row][this.touchCol] = targetIndex;//更新映射
             let action = cc.moveBy(this.moveTime, cc.v2(0,-this.cardSizeY-this.gapY));
             targetNode.runAction(action);
-            cc.log(touchNode.type, targetNode.type);
         }
     },
 
@@ -372,6 +380,11 @@ cc.Class({
                 return;
         }
         this.gameOverLayer.active  = true;
+    },
+
+    addScore:function(score){
+        cc.log(score);
+        this.uiManager.addScore(score);
     },
 
     restartGame:function(){
