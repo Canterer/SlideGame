@@ -12,13 +12,33 @@ cc.Class({
     },
 
     start:function(){
-
+        this.bgMusicId = null;//当前播放背景
     },
 
     playMusic:function(){
-        var bgm = this.getSFX("bgm2")
-        cc.audioEngine.playMusic(bgm, true);
+        if(this.bgMusicIndex == null)
+            this.bgMusicIndex = -1;
+        this.playNextBgMusic();
     },
+
+    playNextBgMusic:function(){
+        // this.bgMusicIndex = this.bgMusicIndex + 1;
+        // this.bgMusicIndex = this.bgMusicIndex % 4;
+        this.bgMusicIndex = 3;
+        cc.log("bgIndex:"+this.bgMusicIndex);
+        cc.loader.loadRes("Audio/"+"bgMusic_"+this.bgMusicIndex, cc.AudioClip, (error, clip)=>{
+            if(error){
+                cc.log(error);
+                return;
+            }
+            cc.log("playMusic");
+            this.bgMusicId = cc.audioEngine.playMusic(clip, true);
+            // cc.audioEngine.setFinishCallback(this.bgMusicId, ()=>{
+            //     cc.log("---------");
+            //     this.playNextBgMusic();
+            // });
+        });  
+    },  
 
     pauseMusic:function(){
         cc.audioEngine.pauseMusic();
