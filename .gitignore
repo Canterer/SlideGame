@@ -1,4 +1,6 @@
 temp/
 library/
 local/
+build/
+packages/
 assets/*.meta
