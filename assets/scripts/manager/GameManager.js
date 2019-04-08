@@ -20,17 +20,17 @@ window.ZS = function(object){
 };
 cc.Class({
     extends: cc.Component,
-    ctor: function(){},
+    // ctor: function(){ this._super(); },
 
-    statics: {
-        _instance: null,
-        getInstance:function(){
-            if(this._instance == null){
-                this._instance = new this;
-            }
-            return this._instance;
-        },
-    },
+    // statics: {
+    //     _instance: null,
+    //     getInstance:function(){
+    //         if(this._instance == null){
+    //             this._instance = new this;
+    //         }
+    //         return this._instance;
+    //     },
+    // },
 
     properties: {
     },
@@ -38,12 +38,9 @@ cc.Class({
     // LIFE-CYCLE CALLBACKS:
 
     onLoad:function () {
-        cc.game.addPersistRootNode(this.node);//常驻节点
+        // cc.game.addPersistRootNode(this.node);//常驻节点
 
-        this.loadSceneManager();//获取当前场景的各种管理器
-        cc.director.preloadScene('MainGame', function () {
-            cc.log('Next scene preloaded');
-        });
+        // this.loadSceneManager();//获取当前场景的各种管理器
     },
 
     // 加载获取当前场景的各种管理器
@@ -58,8 +55,10 @@ cc.Class({
             cc.log("loaded audioManager");
 
         var uiManagerNode = cc.find("UIManager");
-        if(uiManagerNode != null)
+        if(uiManagerNode != null){
             this.uiManager = uiManagerNode.getComponent("UIManager");
+            this.flag = false;
+        }
         else
             this.uiManager = null;
         if(this.uiManager) 
@@ -67,10 +66,13 @@ cc.Class({
     },
 
     start () {
-        if(this.uiManager)
-            this.uiManager.addScore(1);
-        if(this.audioManager)        
-            this.audioManager.playMusic();
+        // if(this.uiManager)
+        //     this.uiManager.addScore(1);
+        // if(this.audioManager)        
+        //     this.audioManager.playMusic();
+        cc.director.preloadScene('MainGame', function () {
+            cc.log('Next scene preloaded');
+        });
     },
 
     getAudioManager:function(){
@@ -78,15 +80,17 @@ cc.Class({
     },
 
     getUIManager:function(){
+        cc.log("getUIManager");
         return this.uiManager;
     },
 
     changeScene:function() {
-        cc.director.loadScene("MainGame", ()=>{ this.loadSceneManager(); });
+        cc.director.loadScene("MainGame");//, ()=>{ this.loadSceneManager(); });
     },
 
     returnStartScene:function() {
-        cc.director.loadScene("StartGame", ()=>{ this.loadSceneManager(); });
+        cc.log("returnStartScene");
+        cc.director.loadScene("StartGame");//, ()=>{ this.loadSceneManager(); });
     },
 
     exitScene:function(){

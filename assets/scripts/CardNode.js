@@ -59,13 +59,15 @@ var CardNode = cc.Class({
     },
     // 检测是否可以合并target  noDirect若为true代表 检测相互合并 不代表方向
     checkMerge:function(target, noDirect){
-        if(this.type == target.type)//同类型同数字可以合并
+        if(this.type == CardType.Soldier)//移动守卫
+            if(target.type == CardType.Soldier)
                 return this.num == target.num;
-        if(this.type == CardType.Soldier)//小于守卫数据的金币、怪物可以被合并
-            return this.num >= target.num; 
-        if(noDirect){//不判断方向
-            return target.type == CardType.Soldier && this.num <= target.num;
-        }
+            else
+                return this.num >= target.num;
+        else if(target.type == CardType.Soldier)//双方类型不同且目标是守卫
+            return noDirect && target.num >= this.num;
+        else//同类型同数字的金币可以合并
+            return this.type == CardType.Money && target.type == CardType.Money && this.num == target.num;
         return false;
     },
 
@@ -73,7 +75,7 @@ var CardNode = cc.Class({
         if(target.type == CardType.Monster)
             return Math.pow(2,target.num);
         return 0;
-    }
+    },
 });
 
 module.exports = CardNode;

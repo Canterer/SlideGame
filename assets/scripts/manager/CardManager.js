@@ -4,7 +4,7 @@ desc:卡片管理器
 author:Canterer
  */
 var CardNode = require("CardNode");
-var GameManager = require("GameManager");
+// var GameManager = require("GameManager");
 const Touch_Min_Length = 40;
 
 cc.Class({
@@ -28,14 +28,13 @@ cc.Class({
             type:cc.Prefab
         },
         gameOverLayer:cc.Node,
-        cardContent: cc.Node
+        cardContent: cc.Node,
+
+        countLabel : cc.Label,
+        scoreLabel : cc.Label,
     },
 
     onLoad:function(){
-        var gameMgr = GameManager.getInstance()
-        this.uiManager = gameMgr.getUIManager();
-        ZS(this.uiManager);
-
         this.cardNodes = [];//数组cardNodes
         this.cardNodeMap = [];//记录每行每列的卡牌 在数组cardNodes中的序号
         this.cardRowFlag = [];//记录每行是否可移动
@@ -79,7 +78,19 @@ cc.Class({
     },
 
     start () {
+        // var gameMgr = GameManager.getInstance()
+        // this.uiManager = gameMgr.getUIManager();
+        this.time = 0;
+        this.timeCallback = function(){
+            this.time += 1;
+            this.countLabel.string = this.time;
+        }
+        this.schedule(this.timeCallback,1);
 
+        this.typeMaxNum = [];
+        this.typeMaxNum[1] = 1;
+        this.typeMaxNum[2] = 1;
+        this.typeMaxNum[3] = 1;
     },
 
     // 自适应布局  计算居中偏移
@@ -168,14 +179,10 @@ cc.Class({
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
-            if(touchNode.type == targetNode.type)
-                touchNode.updateCard(touchNode.type, touchNode.num+1);
-            else
-                this.addScore(touchNode.getMergeScore(targetNode));
+            this.mergeCard(touchNode, targetNode);
             // 将目标放置至最左边
             var x = -this.gapX - this.cardSizeX/2 + this.offsetX;
-            let type = Math.floor(Math.random()*3) + 1;
-            targetNode.updateCard(type,1);
+            this.updateNewCard(targetNode);// 更新随机新卡片
             targetNode.setPosition(cc.v2(x, targetNode.prefab.y));
             // 右移 当前点击卡牌及其左边所有卡牌
             for (var j = this.touchCol; j >= 1; --j) {
@@ -202,14 +209,10 @@ cc.Class({
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
-            if(touchNode.type == targetNode.type)
-                touchNode.updateCard(touchNode.type, touchNode.num+1);
-            else
-                this.addScore(touchNode.getMergeScore(targetNode));
+            this.mergeCard(touchNode, targetNode);
             // 将目标放置至最右边
             var x = this.col*(this.gapX + this.cardSizeX) + this.cardSizeX/2 + this.offsetX;
-            let type = Math.floor(Math.random()*3) + 1;
-            targetNode.updateCard(type,1);
+            this.updateNewCard(targetNode);// 更新随机新卡片
             targetNode.setPosition(cc.v2(x, targetNode.prefab.y));
             // 左移 当前点击卡牌及其右边所有卡牌
             for (var j = this.touchCol; j <= this.col; ++j) {
@@ -236,14 +239,10 @@ cc.Class({
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
-            if(touchNode.type == targetNode.type)
-                touchNode.updateCard(touchNode.type, touchNode.num+1);
-            else
-                this.addScore(touchNode.getMergeScore(targetNode));
+            this.mergeCard(touchNode, targetNode);
             // 将目标放置至最下边
             var y = -this.gapY - this.cardSizeY/2 + this.offsetY;
-            let type = Math.floor(Math.random()*3) + 1;
-            targetNode.updateCard(type,1);
+            this.updateNewCard(targetNode);// 更新随机新卡片
             targetNode.setPosition(cc.v2(targetNode.prefab.x, y));
             // 上移 当前点击卡牌及其下边所有卡牌
             for (var i = this.touchRow; i >= 1; --i) {
@@ -270,14 +269,10 @@ cc.Class({
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
         if(touchNode.checkMerge(targetNode, false)){
             //更新合并结果
-            if(touchNode.type == targetNode.type)
-                touchNode.updateCard(touchNode.type, touchNode.num+1);
-            else
-                this.addScore(touchNode.getMergeScore(targetNode));
+            this.mergeCard(touchNode, targetNode);
             // 将目标放置至最右边
             var y = this.row*(this.gapY + this.cardSizeY) + this.cardSizeY/2 + this.offsetY;
-            let type = Math.floor(Math.random()*3) + 1;
-            targetNode.updateCard(type,1);
+            this.updateNewCard(targetNode);// 更新随机新卡片
             targetNode.setPosition(cc.v2(targetNode.prefab.x, y));
             // 下移 当前点击卡牌及其右边所有卡牌
             for (var i = this.touchRow; i <= this.row; ++i) {
@@ -318,7 +313,7 @@ cc.Class({
             }
         }
         // 检查下一行
-        if(row < self.row){
+        if(row < this.row){
             var index,downNode,node;
             for (var j = 1; j <= this.col; ++j) {
                 index = this.cardNodeMap[row][j];
@@ -356,7 +351,7 @@ cc.Class({
             }
         }
         // 检查右一列
-        if(col < self.col){
+        if(col < this.col){
             var index,rightNode,node;
             for (var i = 1; i <= this.row; ++i) {
                 index = this.cardNodeMap[i][col];
@@ -380,11 +375,15 @@ cc.Class({
                 return;
         }
         this.gameOverLayer.active  = true;
+        this.unschedule(this.timeCallback);
     },
 
     addScore:function(score){
-        cc.log(score);
-        this.uiManager.addScore(score);
+        if(this.score == null)
+            this.score = 0;
+        this.score = this.score + score
+        this.scoreLabel.string = this.score;
+        // this.uiManager.addScore(score);
     },
 
     restartGame:function(){
@@ -408,6 +407,11 @@ cc.Class({
             }
         }
 
+        this.time = 0;
+        this.schedule(this.timeCallback,1);
+        this.score = 0;
+        this.addScore(0);
+
         // 检测记录 行列标识
         for (var i = 1; i <= this.row; ++i) {
             this.cardRowFlag[i] = this.checkRow(i);
@@ -417,15 +421,33 @@ cc.Class({
         }
         this.checkGameOver();
     },
-    ZS:function(object){
-        cc.log("#############");
-        var description = "--------------------------";
-        for(var i in object){
-            if(typeof(object[i]) != "function"){
-                cc.log(i);
-                cc.log(object[i]);
-                cc.log(description);
+
+    //更新合并结果  先判断是否可合并
+    mergeCard:function(touchNode, targetNode){
+        if(touchNode.type == targetNode.type){
+            let maxNum = this.typeMaxNum[targetNode.type];
+            if(maxNum <= touchNode.num){
+                this.typeMaxNum[targetNode.type] = touchNode.num+1;
+                cc.log("update:"+touchNode.type+" maxNum:"+maxNum);
             }
+            touchNode.updateCard(touchNode.type, touchNode.num+1);
         }
+        else
+            this.addScore(touchNode.getMergeScore(targetNode));
+    },
+
+    updateNewCard:function(target){
+        let type = Math.floor(Math.random()*3) + 1;
+        let num = 1;
+        if(type == 3){//怪物
+            let currMax = this.typeMaxNum[2];//获取当前守卫最大值
+            num = Math.floor(Math.random()*3)
+            cc.log("currMax:"+currMax+" random:"+num);            
+            num = num + currMax - 1;
+            num = Math.max(1, num);            
+            num = Math.min(num, 9);            
+        }
+        cc.log("updateNewCard:"+type+"-"+num);
+        target.updateCard(type,num);
     },
 });

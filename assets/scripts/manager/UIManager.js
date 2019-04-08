@@ -17,16 +17,17 @@ var UIManager = cc.Class({
     onLoad:function () {
     },
     start () {
-        self.score = 0	
+        this.score = 0	
     },
     updateScore:function(num){
-        self.score = num;
-        self.scoreLabel.string = self.score;
+        this.score = num;
+        cc.log("sssss:"+this.score);
+        this.scoreLabel.string = this.score;
     },
     addScore:function(num){
-        self.score += num;
-        cc.log(self.score);
-        self.scoreLabel.string = self.score;
+        this.score += num;
+        cc.log(this.score);
+        this.scoreLabel.string = this.score;
     }
 });
 

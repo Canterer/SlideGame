@@ -7,15 +7,15 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        audioNames:[cc.String],
-        audioList:[cc.AudioClip]
     },
 
     start:function(){
         this.bgMusicId = null;//当前播放背景
+        this.playMusic();
     },
 
     playMusic:function(){
+        cc.log("playMusic");
         if(this.bgMusicIndex == null)
             this.bgMusicIndex = -1;
         this.playNextBgMusic();
@@ -24,7 +24,7 @@ cc.Class({
     playNextBgMusic:function(){
         // this.bgMusicIndex = this.bgMusicIndex + 1;
         // this.bgMusicIndex = this.bgMusicIndex % 4;
-        this.bgMusicIndex = 3;
+        this.bgMusicIndex = 0;
         cc.log("bgIndex:"+this.bgMusicIndex);
         cc.loader.loadRes("Audio/"+"bgMusic_"+this.bgMusicIndex, cc.AudioClip, (error, clip)=>{
             if(error){
