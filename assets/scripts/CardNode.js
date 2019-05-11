@@ -8,18 +8,19 @@ var CardColors = require('CardEnum').CardColors;
 var AssetsManager = require('AssetsManager');
 
 var CardNode = cc.Class({
-    // name = "CardNode",
+    name: "CardNode",
     properties: {
         prefab: cc.Node,
-        type: 0,
-        num: 0,
+        type: 1,
+        num: 1,
         index: 1,
     },
 
-    ctor:function(node){
-        this.prefab = node;
-        this.sprite = node.getComponent(cc.Sprite);
-    },
+  //   ctor:function(){
+  //       var node = arguments[0];
+		// this.prefab = node;
+  //       this.sprite = node.getComponent(cc.Sprite);        	
+  //   },
 
     runAction:function(action){
         this.prefab.runAction(action);
@@ -27,8 +28,13 @@ var CardNode = cc.Class({
     setPosition:function(position){
         this.prefab.setPosition(position);
     },
-    initCard:function(type, num)
+    setShow:function(bool){
+        this.prefab.active = bool;
+    },
+    initCard:function(node, type, num)
     {
+    	this.prefab = node;
+    	this.sprite = node.getComponent(cc.Sprite);
         // if(type in CardColors){
         //     this.type = type;
         //     // this.prefab.color = CardColors[type];
@@ -71,9 +77,11 @@ var CardNode = cc.Class({
         return false;
     },
 
-    getMergeScore:function(target){
-        if(target.type == CardType.Monster)
-            return Math.pow(2,target.num);
+    getScore:function(){
+        if(this.type == CardType.Money)
+            return Math.pow(2,this.num);
+        if(this.type == CardType.Monster)
+            return 1;
         return 0;
     },
 });

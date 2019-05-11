@@ -8,6 +8,10 @@ window.ZS = function(object){
         cc.log("ZS(null)");
         return;
     }
+    if(object instanceof String){
+        cc.log(object);
+        return;
+    }
     cc.log("#############");
     var description = "--------------------------";
     for(var i in object){
@@ -18,19 +22,19 @@ window.ZS = function(object){
         }
     }
 };
-cc.Class({
-    extends: cc.Component,
+var GameManager = cc.Class({
+    name: "GameManager",
+    // extends: cc.Component,
     // ctor: function(){ this._super(); },
-
-    // statics: {
-    //     _instance: null,
-    //     getInstance:function(){
-    //         if(this._instance == null){
-    //             this._instance = new this;
-    //         }
-    //         return this._instance;
-    //     },
-    // },
+    statics: {
+        _instance: null,
+        getInstance:function(){
+            if(this._instance == null){
+                this._instance = new this;
+            }
+            return this._instance;
+        },
+    },
 
     properties: {
     },
@@ -53,39 +57,23 @@ cc.Class({
             this.audioManager = null;
         if(this.audioManager)
             cc.log("loaded audioManager");
-
-        var uiManagerNode = cc.find("UIManager");
-        if(uiManagerNode != null){
-            this.uiManager = uiManagerNode.getComponent("UIManager");
-            this.flag = false;
-        }
-        else
-            this.uiManager = null;
-        if(this.uiManager) 
-            cc.log("loaded uiManager");
     },
 
     start () {
-        // if(this.uiManager)
-        //     this.uiManager.addScore(1);
         // if(this.audioManager)        
         //     this.audioManager.playMusic();
-        cc.director.preloadScene('MainGame', function () {
-            cc.log('Next scene preloaded');
-        });
     },
 
     getAudioManager:function(){
         return this.audioManager;
     },
 
-    getUIManager:function(){
-        cc.log("getUIManager");
-        return this.uiManager;
+    preloadScene:function(sceneName, callback){
+        cc.director.preloadScene(sceneName, callback());
     },
 
-    changeScene:function() {
-        cc.director.loadScene("MainGame");//, ()=>{ this.loadSceneManager(); });
+    changeScene:function(sceneName) {
+        cc.director.loadScene(sceneName);//, ()=>{ this.loadSceneManager(); });
     },
 
     returnStartScene:function() {
@@ -97,4 +85,6 @@ cc.Class({
 
     },
 });
+
+module.exports = GameManager;
 // module.exports = GameManager.getInstance();

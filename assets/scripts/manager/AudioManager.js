@@ -3,7 +3,7 @@ module:AudioManager
 desc:音频管理器
 author:Canterer
  */
-cc.Class({
+var AudioManager = cc.Class({
     extends: cc.Component,
 
     properties: {
@@ -11,14 +11,16 @@ cc.Class({
 
     start:function(){
         this.bgMusicId = null;//当前播放背景
-        this.playMusic();
     },
 
     playMusic:function(){
-        cc.log("playMusic");
         if(this.bgMusicIndex == null)
             this.bgMusicIndex = -1;
         this.playNextBgMusic();
+    },
+
+    stopMusic:function(){
+        cc.audioEngine.stopMusic();
     },
 
     playNextBgMusic:function(){
@@ -31,7 +33,6 @@ cc.Class({
                 cc.log(error);
                 return;
             }
-            cc.log("playMusic");
             this.bgMusicId = cc.audioEngine.playMusic(clip, true);
             // cc.audioEngine.setFinishCallback(this.bgMusicId, ()=>{
             //     cc.log("---------");
@@ -60,3 +61,5 @@ cc.Class({
         }
     },
 });
+
+module.exports = AudioManager;

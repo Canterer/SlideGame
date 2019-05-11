@@ -5,9 +5,10 @@ author:Canterer
  */
 var CardNode = require("CardNode");
 // var GameManager = require("GameManager");
+var MainPanel = require("MainPanel");
 const Touch_Min_Length = 40;
 
-cc.Class({
+var CardManager = cc.Class({
     extends: cc.Component,
 
     properties: {
@@ -19,6 +20,7 @@ cc.Class({
         cardSizeY:0,//卡牌大小        
         offsetX:0,//偏移 默认居中显示后的偏移        
         offsetY:0,//偏移 默认居中显示后的偏移
+        cardScale:1,//卡牌缩放比率
         cardNodePrefab:{
             default: null,
             type:cc.Prefab
@@ -27,11 +29,8 @@ cc.Class({
             default: null,
             type:cc.Prefab
         },
-        gameOverLayer:cc.Node,
         cardContent: cc.Node,
-
-        countLabel : cc.Label,
-        scoreLabel : cc.Label,
+        parentPanel: MainPanel,
     },
 
     onLoad:function(){
@@ -40,10 +39,23 @@ cc.Class({
         this.cardRowFlag = [];//记录每行是否可移动
         this.cardColFlag = [];//记录每列是否可移动
         this.moveTime = 0.5;//移动时长
+        this.typeMaxNum = [];//记录卡片类型历史最大值
+        this.typeMaxNum[1] = 1;
+        this.typeMaxNum[2] = 1;
+        this.typeMaxNum[3] = 1;
         this.adaptiveLayout();
-        this.gameOverLayer.active  = false;
+    },
 
+    start () {
+        // var gameMgr = GameManager.getInstance()
+        this.initCardLayout();
+        this.checkAll();
+        this.checkGameOver();
+        this.addEventHandler();
+    },
 
+    // 初始化卡片
+    initCardLayout(){
         var delay = 0;
         var index = 0;
         var size = cc.size(this.cardSizeX, this.cardSizeY);
@@ -51,7 +63,7 @@ cc.Class({
             this.cardNodeMap[i] = [];
             for (var j =  1; j <= this.col; ++j) {
                 var x = j*(this.gapX + this.cardSizeX) - this.cardSizeX/2 - this.gapX + this.offsetX;
-        		var y = i*(this.gapY + this.cardSizeY) - this.cardSizeY/2 - this.gapY + this.offsetY;
+                var y = i*(this.gapY + this.cardSizeY) - this.cardSizeY/2 - this.gapY + this.offsetY;
                 var position = cc.v2(x,y);
                 this.initCardBg(i, j, size, position);
 
@@ -61,41 +73,17 @@ cc.Class({
                 this.cardNodes[index] = cardNode;
                 this.cardNodeMap[i][j] = index;
                 var action = cc.sequence(cc.delayTime(delay),cc.moveTo(1, position));
-		        cardNode.runAction(action);
+                cardNode.runAction(action);
                 index = index + 1;
             }
         }
-
-        // 检测记录 行列标识
-        for (var i = 1; i <= this.row; ++i) {
-            this.cardRowFlag[i] = this.checkRow(i);
-        }
-        for (var j = 1; j <= this.col; ++j) {
-            this.cardColFlag[j] = this.checkCol(j);
-        }
-        this.checkGameOver();
-        this.addEventHandler();
-    },
-
-    start () {
-        // var gameMgr = GameManager.getInstance()
-        // this.uiManager = gameMgr.getUIManager();
-        this.time = 0;
-        this.timeCallback = function(){
-            this.time += 1;
-            this.countLabel.string = this.time;
-        }
-        this.schedule(this.timeCallback,1);
-
-        this.typeMaxNum = [];
-        this.typeMaxNum[1] = 1;
-        this.typeMaxNum[2] = 1;
-        this.typeMaxNum[3] = 1;
     },
 
     // 自适应布局  计算居中偏移
     adaptiveLayout:function(){
-        var offsetX = cc.winSize.width - this.col*(this.cardSizeX+this.gapX) - this.gapX;
+        this.cardSizeX = this.cardSizeX*this.cardScale;
+        this.cardSizeY = this.cardSizeY*this.cardScale;
+        var offsetX = cc.winSize.width - this.col*(this.cardSizeX+this.gapX) + this.gapX;
         this.offsetX = this.offsetX + offsetX/2;
         var contentHeight = this.row*(this.cardSizeY + this.gapY) - this.gapY;
         this.cardContent.height = contentHeight + this.offsetY;
@@ -105,7 +93,7 @@ cc.Class({
     initCardBg:function(row, col, size, position){
         var node = cc.instantiate(this.cardBgPrefab);
         node.name = 'cardBg_' + row + "_" + col;
-        node.setContentSize(size);
+        node.setContentSize(size);//设置原始大小  不受缩放影响
         node.setParent(this.cardContent);
         node.setPosition(position);
         node.on('touchstart', (event)=>{
@@ -117,15 +105,15 @@ cc.Class({
     },
 
     // 创建单个卡牌 并指定位置
-    createCard:function(type, num, position)
-    {
+    createCard:function(type, num, position){
         var node = cc.instantiate(this.cardNodePrefab);
         node.setParent(this.cardContent);
-        node.width = this.cardSizeX;
-        node.height = this.cardSizeY;
+        node.width = this.cardSizeX/this.cardScale;
+        node.height = this.cardSizeY/this.cardScale;
+        node.setScale(this.cardScale);
         node.setPosition(position);
-    	var cardNode = new CardNode(node);
-        cardNode.updateCard(type, num);
+        var cardNode = new CardNode();
+        cardNode.initCard(node, type, num);
         return cardNode;
     },
 
@@ -142,7 +130,10 @@ cc.Class({
             this.onTouchEnd(event);
         });
     },
+
     onTouchEnd:function(event){
+        if(this.startPoint == null)
+            return;
         this.endPoint = event.getLocation();
         var vec = this.endPoint.sub(this.startPoint);
         if( vec.mag() > Touch_Min_Length){
@@ -167,13 +158,14 @@ cc.Class({
         }, this.moveTime);
         this.touchRow = null;
         this.touchCol = null;
+        this.startPoint = null;
     },
 
     touchMoveRight:function(){
         if(this.touchCol >= this.col)// 不能右移
             return;
         var touchIndex = this.cardNodeMap[this.touchRow][this.touchCol];
-        var targetIndex = this.cardNodeMap[this.touchRow][this.touchCol+1]
+        var targetIndex = this.cardNodeMap[this.touchRow][this.touchCol+1];
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
@@ -200,10 +192,10 @@ cc.Class({
     },
 
     touchMoveLeft:function(){
-        if(this.touchCol < 1)// 不能左移
+        if(this.touchCol <= 1)// 不能左移
             return;
         var touchIndex = this.cardNodeMap[this.touchRow][this.touchCol];
-        var targetIndex = this.cardNodeMap[this.touchRow][this.touchCol-1]
+        var targetIndex = this.cardNodeMap[this.touchRow][this.touchCol-1];
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
@@ -230,10 +222,10 @@ cc.Class({
     },
 
     touchMoveUp:function(){
-        if(this.touchRow >= this.rol)// 不能上移
+        if(this.touchRow >= this.row)// 不能上移
             return;
         var touchIndex = this.cardNodeMap[this.touchRow][this.touchCol];
-        var targetIndex = this.cardNodeMap[this.touchRow+1][this.touchCol]
+        var targetIndex = this.cardNodeMap[this.touchRow+1][this.touchCol];
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
@@ -260,10 +252,10 @@ cc.Class({
     },
 
     touchMoveDown:function(){
-        if(this.touchRow < 1)// 不能下移
+        if(this.touchRow <= 1)// 不能下移
             return;
         var touchIndex = this.cardNodeMap[this.touchRow][this.touchCol];
-        var targetIndex = this.cardNodeMap[this.touchRow-1][this.touchCol]
+        var targetIndex = this.cardNodeMap[this.touchRow-1][this.touchCol];
         var touchNode = this.cardNodes[touchIndex];
         var targetNode = this.cardNodes[targetIndex];
         // cc.log(touchNode.type, touchNode.num, targetNode.type, targetNode.num);
@@ -286,6 +278,17 @@ cc.Class({
             this.cardNodeMap[this.row][this.touchCol] = targetIndex;//更新映射
             let action = cc.moveBy(this.moveTime, cc.v2(0,-this.cardSizeY-this.gapY));
             targetNode.runAction(action);
+        }
+    },
+
+    // 检测更新
+    checkAll(){
+        // 检测记录 行列标识
+        for (var i = 1; i <= this.row; ++i) {
+            this.cardRowFlag[i] = this.checkRow(i);
+        }
+        for (var j = 1; j <= this.col; ++j) {
+            this.cardColFlag[j] = this.checkCol(j);
         }
     },
 
@@ -374,20 +377,10 @@ cc.Class({
             if(this.cardColFlag[i] == true)
                 return;
         }
-        this.gameOverLayer.active  = true;
-        this.unschedule(this.timeCallback);
-    },
-
-    addScore:function(score){
-        if(this.score == null)
-            this.score = 0;
-        this.score = this.score + score
-        this.scoreLabel.string = this.score;
-        // this.uiManager.addScore(score);
+        this.gameOverEvent(true);
     },
 
     restartGame:function(){
-        this.gameOverLayer.active  = false;
         var delay = 0;
         var size = cc.size(this.cardSizeX, this.cardSizeY);
         for (var i = 1; i <= this.row; ++i) {
@@ -407,10 +400,10 @@ cc.Class({
             }
         }
 
-        this.time = 0;
-        this.schedule(this.timeCallback,1);
-        this.score = 0;
-        this.addScore(0);
+        // this.gameOverEvent(false);
+        // this.setScore(0);
+        if(this.parentPanel)
+            this.parentPanel.restartGame();
 
         // 检测记录 行列标识
         for (var i = 1; i <= this.row; ++i) {
@@ -433,11 +426,20 @@ cc.Class({
             touchNode.updateCard(touchNode.type, touchNode.num+1);
         }
         else
-            this.addScore(touchNode.getMergeScore(targetNode));
+            this.changeScore(targetNode.getScore());
+
+        if(this.parentPanel)
+            this.parentPanel.resetTime();
     },
 
     updateNewCard:function(target){
-        let type = Math.floor(Math.random()*3) + 1;
+        let MonsterMax = this.typeMaxNum[3];//获取当前怪物最大值
+        let type = 1;
+        if(MonsterMax >= 5){//怪物历史最大值大于5 降低怪物出现概率
+            type = Math.floor(Math.random()*5);
+            type = Math.floor(type/2) + 1;
+        }else
+            type = Math.floor(Math.random()*3) + 1;
         let num = 1;
         if(type == 3){//怪物
             let currMax = this.typeMaxNum[2];//获取当前守卫最大值
@@ -450,4 +452,21 @@ cc.Class({
         cc.log("updateNewCard:"+type+"-"+num);
         target.updateCard(type,num);
     },
+
+    setScore(score){
+        if(this.parentPanel)
+            this.parentPanel.setScore(score);
+    },
+
+    changeScore(delta){
+        if(this.parentPanel)
+            this.parentPanel.changeScore(delta);
+    },
+
+    gameOverEvent(bool){
+        if(this.parentPanel)
+            this.parentPanel.gameOver();
+    },
 });
+
+module.exports = CardManager;
